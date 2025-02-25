@@ -34,3 +34,9 @@ QMK is developed and maintained by Jack Humbert of OLKB with contributions from 
 ## Official Website
 
 [qmk.fm](https://qmk.fm) is the official website of QMK, where you can find links to this page, the documentation, and the keyboards supported by QMK.
+
+## Josiah Specific
+To build and flash...
+```
+qmk compile --kb keychron/k8_pro/ansi/white --km custom &&  dfu-util -a 0 -d 0483:df11 -s 0x8000000:mass-erase:force:leave -D ./.build/keychron_k8_pro_ansi_white_custom.bin
+```

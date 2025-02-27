@@ -15,78 +15,17 @@
  */
 
 #include QMK_KEYBOARD_H
+#include "print.h"
 
 // clang-format off
 enum layers{
   WIN_BASE,
   WIN_FN,
-  VIM_KEYS,
-  NUMPAD,
   MIN_BASE,
   MIN_NAV,
   MIN_NUM
 };
 
-// Tap-Dance actions
-enum {
-    LALT_OR_VIM_KEYS,
-    RALT_OR_NUMPAD
-};
-
-// Code below modified from https://docs.qmk.fm/features/tap_dance#example-5-using-tap-dance-for-advanced-mod-tap-and-layer-tap-keys (Complex Example 3)
-typedef struct {
-    uint16_t layer;
-    uint16_t hold;
-    uint16_t held;
-} tap_dance_tap_hold_t;
-
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    tap_dance_action_t *action;
-
-    switch (keycode) {
-        case TD(LALT_OR_VIM_KEYS):
-        case TD(RALT_OR_NUMPAD):
-            action = &tap_dance_actions[TD_INDEX(keycode)];
-            if (!record->event.pressed && action->state.count && !action->state.finished) {
-                tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                layer_invert(tap_hold->layer);
-            }
-    }
-    return true;
-}
-
-void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
-    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
-
-    if (state->pressed) {
-        if (state->count == 1
-#ifndef PERMISSIVE_HOLD
-            && !state->interrupted
-#endif
-        ) {
-            register_code16(tap_hold->hold);
-            tap_hold->held = tap_hold->hold;
-        }
-    }
-}
-
-void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
-    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
-
-    if (tap_hold->held) {
-        unregister_code16(tap_hold->held);
-        tap_hold->held = 0;
-    }
-}
-
-#define ACTION_TAP_DANCE_TAP_LAYER_HOLD_KEY(layer, hold) \
-{ .fn = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, .user_data = (void *)&((tap_dance_tap_hold_t){layer, hold, 0}), }
-
-
-tap_dance_action_t tap_dance_actions[] = {
-    [LALT_OR_VIM_KEYS] = ACTION_TAP_DANCE_TAP_LAYER_HOLD_KEY(VIM_KEYS, KC_LALT),
-    [RALT_OR_NUMPAD] = ACTION_TAP_DANCE_TAP_LAYER_HOLD_KEY(NUMPAD, KC_RALT),
-};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /*	Windows layout
@@ -111,7 +50,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,    KC_END,   KC_PGDN,
      KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,
      KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,             KC_UP,
-     KC_LCTL,  KC_LGUI,  TD(LALT_OR_VIM_KEYS),                   KC_SPC,                      TD(RALT_OR_NUMPAD),  KC_RGUI, MO(WIN_FN),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
+     KC_LCTL,  KC_LGUI,  KC_LALT,                      KC_SPC,                      KC_RALT,  KC_RGUI, MO(WIN_FN),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
 
 [WIN_FN] = LAYOUT_tkl_ansi(
      KC_TRNS,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
@@ -121,35 +60,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_TRNS,            KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  BAT_LVL,  NK_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,            KC_TRNS,
      KC_TRNS,  KC_TRNS,  KC_TRNS,                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS),
 
-[VIM_KEYS] = LAYOUT_tkl_ansi(
-     KC_TRNS,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
-     KC_TRNS,  BT_HST1,  BT_HST2,  BT_HST3,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
-     KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
-     KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_LEFT,  KC_DOWN,    KC_UP,  KC_RGHT,  KC_TRNS,  KC_TRNS,            KC_TRNS,
-     KC_TRNS,            KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  BAT_LVL,  NK_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,            KC_TRNS,
-     KC_TRNS,  KC_TRNS,  TD(LALT_OR_VIM_KEYS),                   KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS),
-
-[NUMPAD] = LAYOUT_tkl_ansi(
-     KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
-     KC_TRNS,  BT_HST1,  BT_HST2,  BT_HST3,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
-     KC_TRNS,  KC_TRNS,     KC_7,     KC_8,     KC_9,  KC_TRNS,  KC_TRNS,     KC_7,     KC_8,     KC_9,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
-     KC_TRNS,     KC_0,     KC_4,     KC_5,     KC_6,  KC_TRNS,  KC_TRNS,     KC_4,     KC_5,     KC_6,  KC_TRNS,  KC_TRNS,            KC_TRNS,
-     KC_TRNS,               KC_1,     KC_2,     KC_3,  KC_TRNS,  KC_TRNS,     KC_0,     KC_1,     KC_2,     KC_3,  KC_TRNS,            KC_TRNS,            KC_TRNS,
-     KC_TRNS,  KC_TRNS,  KC_TRNS,                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS),
-
 // Experimental Layout to accustom me to fewer keys
 [MIN_BASE] = LAYOUT_tkl_ansi(
      KC_ESC,   KC_F1,    KC_F2,    KC_F3,              KC_F4,              KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,             KC_PSCR,   QK_BOOT,  BL_STEP,
      KC_GRV,   KC_1,     KC_2,     KC_3,               KC_4,               KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,    KC_HOME,  KC_PGUP,
      KC_TAB,   KC_Q,     KC_W,     KC_E,               KC_R,               KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,    KC_END,   KC_PGDN,
-     KC_CAPS,  MT(MOD_LGUI, KC_A), MT(MOD_LALT, KC_S), MT(MOD_LCTL, KC_D), MT(MOD_LSFT, KC_F), KC_G,     KC_H,     MT(MOD_RSFT, KC_J), MT(MOD_RCTL, KC_K), MT(MOD_RALT, KC_L), MT(MOD_RGUI, KC_SCLN),  KC_QUOT,            KC_ENT,
-     KC_LSFT,            KC_Z,     KC_X,               KC_C,               KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,             KC_UP,
-     KC_LCTL,  KC_LGUI,  MO(MIN_NAV),                   KC_SPC,                      MO(MIN_NUM),  KC_RGUI, KC_TRNS,KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
+     KC_CAPS,  MT(MOD_LSFT, KC_A), MT(MOD_LCTL, KC_S), MT(MOD_LGUI, KC_D), MT(MOD_LALT, KC_F), KC_G,     KC_H,     MT(MOD_RALT, KC_J), MT(MOD_RGUI, KC_K), MT(MOD_RCTL, KC_L), MT(MOD_RSFT, KC_SCLN),  KC_QUOT,            KC_ENT,
+     KC_NO,            KC_Z,     KC_X,               KC_C,               KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_NO,             KC_UP,
+     QK_LEAD,  KC_NO,  MO(MIN_NAV),                  KC_SPC,                      MO(MIN_NUM),  KC_NO, KC_NO,KC_NO,  KC_LEFT,  KC_DOWN,  KC_RGHT),
 
 [MIN_NAV] = LAYOUT_tkl_ansi(
      KC_TRNS,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
      KC_TRNS,  BT_HST1,  BT_HST2,  BT_HST3,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
-     KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
+     KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_BSPC,  KC_DEL ,  KC_ESC ,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,
      KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_LEFT,  KC_DOWN,    KC_UP,  KC_RGHT,  KC_TRNS,  KC_TRNS,            KC_TRNS,
      KC_TRNS,            KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  BAT_LVL,  NK_TOGG,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,            KC_TRNS,
      KC_TRNS,  KC_TRNS,  KC_TRNS,                      KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS),
@@ -167,9 +90,15 @@ bool dip_switch_update_user_set_keymap(uint8_t index, bool active){
   switch(index){
     case 0:
       if(active) { // Windows mode
+          set_single_persistent_default_layer(WIN_BASE);
           layer_move(WIN_BASE);
+          dprintf("default_layer_state = %08hX(%u)\n", default_layer_state, get_highest_layer(default_layer_state));
+          dprintf("        layer_state = %08hX(%u)\n", layer_state, get_highest_layer(layer_state));
       } else { // Minimal mode
+          set_single_persistent_default_layer(MIN_BASE);
           layer_move(MIN_BASE);
+          dprintf("default_layer_state = %08hX(%u)\n", default_layer_state, get_highest_layer(default_layer_state));
+          dprintf("        layer_state = %08hX(%u)\n", layer_state, get_highest_layer(layer_state));
       }
       return false;
     case 1:
@@ -185,3 +114,51 @@ bool dip_switch_update_user_set_keymap(uint8_t index, bool active){
   return true;
 }
 
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    uint16_t simple_keycode = 0xff & keycode;
+    switch (simple_keycode) {
+        case KC_A:
+        case KC_G:
+            if (record->event.pressed) {
+                uprintf("%5u : Key %c pressed.\n", record->event.time, simple_keycode == KC_A ? 'A' : 'G');
+            } else {
+                uprintf("%5u : Key %c released.\n", record->event.time, simple_keycode == KC_A ? 'A' : 'G');
+            }
+            break;
+    }
+    return true;
+}
+
+void leader_start_user(void) {
+    // Do something when the leader key is pressed
+}
+
+void leader_end_user(void) {
+    if (leader_sequence_one_key(KC_D)) {
+        // Print debug info
+#ifdef PERMISSIVE_HOLD
+        print("PERMISSIVE_HOLD is enabled\n");
+#else
+        print("PERMISSIVE_HOLD is disabled\n");
+#endif
+        uprintf("TAPPING_TERM = %d\n", TAPPING_TERM);
+
+    } else if (leader_sequence_two_keys(KC_D, KC_D)) {
+        // Leader, d, d => Ctrl+A, Ctrl+C
+        SEND_STRING(SS_LCTL("a") SS_LCTL("c"));
+    } else if (leader_sequence_three_keys(KC_D, KC_D, KC_S)) {
+        // Leader, d, d, s => Types the below string
+        SEND_STRING("https://start.duckduckgo.com\n");
+    } else if (leader_sequence_two_keys(KC_A, KC_S)) {
+        // Leader, a, s => GUI+S
+        tap_code16(LGUI(KC_S));
+    }
+}
+
+void keyboard_post_init_user(void) {
+  // Customise these values to desired behaviour
+  debug_enable=true;
+  //debug_matrix=true;
+  //debug_keyboard=true;
+  //debug_mouse=true;
+}

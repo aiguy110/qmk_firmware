@@ -16,6 +16,8 @@
 
 #pragma once
 
+#define TAPPING_TERM 200
+
 #ifdef LED_MATRIX_ENABLE
 /* LED matrix driver configuration */
 #    define DRIVER_COUNT 1

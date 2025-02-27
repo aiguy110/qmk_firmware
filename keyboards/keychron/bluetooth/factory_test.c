@@ -16,6 +16,7 @@
 
 #include "quantum.h"
 #include "raw_hid.h"
+#include "print.h"
 #ifdef KC_BLUETOOTH_ENABLE
 #include "transport.h"
 #include "ckbt51.h"

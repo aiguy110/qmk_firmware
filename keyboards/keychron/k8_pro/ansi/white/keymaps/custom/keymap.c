@@ -114,6 +114,27 @@ bool dip_switch_update_user_set_keymap(uint8_t index, bool active){
   return true;
 }
 
+void leader_start_user(void) {
+    // Do something when the leader key is pressed
+}
+
+void leader_end_user(void) {
+    if (leader_sequence_one_key(KC_D)) {
+        // Print debug info
+#ifdef PERMISSIVE_HOLD
+        print("PERMISSIVE_HOLD is enabled\n");
+#else
+        print("PERMISSIVE_HOLD is disabled\n");
+#endif
+#ifdef HOLD_ON_OTHER_KEY_PRESS
+        print("HOLD_ON_OTHER_KEY_PRESS is enabled\n");
+#else
+        print("HOLD_ON_OTHER_KEY_PRESS is disabled\n");
+#endif
+        uprintf("TAPPING_TERM = %d\n", TAPPING_TERM);
+    }
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     uint16_t simple_keycode = 0xff & keycode;
     switch (simple_keycode) {
@@ -129,31 +150,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-void leader_start_user(void) {
-    // Do something when the leader key is pressed
-}
-
-void leader_end_user(void) {
-    if (leader_sequence_one_key(KC_D)) {
-        // Print debug info
-#ifdef PERMISSIVE_HOLD
-        print("PERMISSIVE_HOLD is enabled\n");
-#else
-        print("PERMISSIVE_HOLD is disabled\n");
-#endif
-        uprintf("TAPPING_TERM = %d\n", TAPPING_TERM);
-
-    } else if (leader_sequence_two_keys(KC_D, KC_D)) {
-        // Leader, d, d => Ctrl+A, Ctrl+C
-        SEND_STRING(SS_LCTL("a") SS_LCTL("c"));
-    } else if (leader_sequence_three_keys(KC_D, KC_D, KC_S)) {
-        // Leader, d, d, s => Types the below string
-        SEND_STRING("https://start.duckduckgo.com\n");
-    } else if (leader_sequence_two_keys(KC_A, KC_S)) {
-        // Leader, a, s => GUI+S
-        tap_code16(LGUI(KC_S));
-    }
-}
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour

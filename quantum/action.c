@@ -493,10 +493,11 @@ void process_action(keyrecord_t *record, action_t action) {
                                 get_hold_on_other_key_press(get_event_keycode(record->event, false), record) &&
 #        endif
                                 record->tap.interrupted) {
-                                ac_dprintf("mods_tap: tap: cancel: add_mods\n");
-                                // ad hoc: set 0 to cancel tap
-                                record->tap.count = 0;
-                                register_mods(mods);
+                                //ac_dprintf("mods_tap: tap: cancel: add_mods\n");
+                                //// ad hoc: set 0 to cancel tap
+                                //record->tap.count = 0;
+                                //register_mods(mods);
+                                register_code(action.key.code);
                             } else
 #    endif
                             {

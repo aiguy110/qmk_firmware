@@ -67,7 +67,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_TAB,   KC_Q,     KC_W,     KC_E,               KC_R,               KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,    KC_END,   KC_PGDN,
      KC_CAPS,  MT(MOD_LSFT, KC_A), MT(MOD_LCTL, KC_S), MT(MOD_LGUI, KC_D), MT(MOD_LALT, KC_F), KC_G,     KC_H,     MT(MOD_RALT, KC_J), MT(MOD_RGUI, KC_K), MT(MOD_RCTL, KC_L), MT(MOD_RSFT, KC_SCLN),  KC_QUOT,            KC_ENT,
      KC_NO,            KC_Z,     KC_X,               KC_C,               KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_NO,             KC_UP,
-     QK_LEAD,  KC_NO,  MO(MIN_NAV),                  KC_SPC,                      MO(MIN_NUM),  KC_NO, KC_NO,KC_NO,  KC_LEFT,  KC_DOWN,  KC_RGHT),
+     QK_LEAD,  KC_NO,  LT(MIN_NAV, KC_LGUI),                  KC_SPC,                      MO(MIN_NUM),  KC_NO, KC_NO,KC_NO,  KC_LEFT,  KC_DOWN,  KC_RGHT),
 
 [MIN_NAV] = LAYOUT_tkl_ansi(
      KC_TRNS,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  BL_DOWN,  BL_UP,    KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,            KC_TRNS,  KC_TRNS,  BL_TOGG,
